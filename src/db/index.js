@@ -8,7 +8,8 @@ const connectDB = async () => {
     }
     catch(error){
         console.log("MONGODB connection ERROR",error);
-        process.exit(1);
+        process.exit(1);// like our AAPLICATION EXIT HO JAYEGA AGAR MONGODB SE CONNECT NA HO PAYE TOH 
+        //PROCESS ->> like our application is running at a particular instance and w can exit that instance by using process.exit() method and we can also pass a code to it like 0 means success and 1 means failure
     }
 }
 
