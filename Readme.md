@@ -15,10 +15,12 @@ NOTE : Multer will not process any form that is not a multipart ( multipart/form
 Installation
 
 $ npm install --save multer
+npm i multer
+
 
 Usage
 
-Multer adds an object bodyand an object fileor filesto the object request. The object bodycontains the values ​​of the text fields of the form, the object fileor filescontains the files uploaded via the form.
+Multer adds an object body and an object file or files to the object request. The object bodycontains the values ​​of the text fields of the form, the object fileor filescontains the files uploaded via the form.
 
 Example of basic use:
 

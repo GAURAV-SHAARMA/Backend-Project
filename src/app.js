@@ -14,7 +14,19 @@ app.use(express.urlencoded({extended:true , limit:"16kb"}));
 app.use(express.static("public"));
 app.use(cookieParser());
 
+// Routes import
 
-app.listen(process.env.PORT || 8000 , ()=>{
-    console.log(`Server is running on port ${process.env.PORT}`)
+import userRoutes from "./routes/user.routes.js"
+
+// routes declarartion
+
+app.use("/api/v1/user", userRoutes)
+app.get("/", (req, res) => {
+    res.status(200).json({
+        message: "Code with Gaurav"
+    });
 })
+
+
+export default app;
+
