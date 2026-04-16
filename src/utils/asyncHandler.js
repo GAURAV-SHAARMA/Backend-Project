@@ -1,4 +1,4 @@
-
+// this is the helper function to handle the async request and catch the error and pass it to the next middleware
 const asyncHandler = (requestHandler) => {
     return (req , res , next)=>{
         Promise.resolve(requestHandler(req , res , next)).

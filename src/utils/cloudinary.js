@@ -8,7 +8,7 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 })
 
-const uploadImageToCloudinary = async (localfilePath) => {
+const uploadToCloudinary = async (localfilePath) => {
     try{
         if(!localfilePath){
             return null;
@@ -32,7 +32,7 @@ const uploadImageToCloudinary = async (localfilePath) => {
     }
 }
 
-export {uploadImageToCloudinary}
+export {uploadToCloudinary}
 
 cloudinary.uploader.upload("path/to/your/image.jpg", 
     {public_id:"TheCoders"},
