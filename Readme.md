@@ -192,11 +192,10 @@ const upload = multer().single('avatar')
 app.post('/profile', function (req, res) {
   upload(req, res, function (err) {
     if (err instanceof multer.MulterError) {
-      // Une erreur Multer s'est produite lors du téléchargement.
+      
     } else if (err) {
-      // Une erreur inconnue s'est produite lors du téléchargement.
+     
     }
 
-    // Tout s'est bien passé.
   })
 })
