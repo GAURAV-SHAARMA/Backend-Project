@@ -199,3 +199,6 @@ app.post('/profile', function (req, res) {
 
   })
 })
+
+
+>>> we can use kill_port.bat to kill the port , if cmd said ki port is occupied
