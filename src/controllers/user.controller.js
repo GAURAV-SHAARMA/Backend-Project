@@ -7,6 +7,24 @@ import { uploadToCloudinary } from "../utils/cloudinary.js";
 
 import { ApiResponse } from "../utils/ApiResponse.js";
 
+// for easy access and to avoid code repetition we will create a function to generate access token and refresh token
+const generateAccessAndRefreshToken = async(userId) => {
+    try{
+ 
+        const user = await User.findById(userId);
+        const accessToken = user.generateAccessToken();
+        const refreshToken = user.generateRefreshToken();
+        
+        user.refreshtoken = refreshToken;// to save refresh token on database for future use when user will send request for new access token with refresh token then we will match the refresh token with the one stored in database if match then we will generate new access token and refresh token and send it to user and also update the refresh token in database
+        await user.save({ validateBeforeSave: false })
+
+        return { accessToken, refreshToken }
+
+    }     catch(err){
+        throw new ApiError("Error in generating access token and refresh token", 500)
+    }
+}
+
 const registerUser = asyncHandler(async (req, res) => {
     //    res.status(200).json({
     //         message: "ok"
@@ -54,9 +72,15 @@ const registerUser = asyncHandler(async (req, res) => {
     if (existedUser) {
         throw new ApiError("User already exist with this email or username", 409)
     }
+    console.log(req.files); // check if files are coming or not (checked)
 
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverimageLocalpath = req.files?.coverImage[0]?.path;
+    // const coverimageLocalpath = req.files?.coverImage[0]?.path;
+
+    let coverimageLocalpath ;// to check when cover image request is not sent by user then it will be null and we can handle it in cloudinary upload function
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0){
+        coverimageLocalpath = req.files.coverImage[0].path;
+    }
 
     // now we have the path of the images in our local storage but we need to upload them on cloudinary and get the url and then save it in the database
 
@@ -96,6 +120,97 @@ const registerUser = asyncHandler(async (req, res) => {
     )
 })
 
+// login system
+
+const loginUser = asyncHandler(async (req, res) => {
+    // req body-> data
+    // username or email or bothg
+    // find the user
+    //password check
+    // access token and refresh token generate
+    // send cookies
+    // response
+
+        const { username, email, password } = req.body
+        if(!(username || email)){
+            console.log("Body:", req.body);
+            throw new ApiError("Username or email is required", 400)
+        }
+
+        const user = await User.findOne({
+            $or : [{username}, {email}]  // ager dono username aur email diye gaye to dono me se koi bhi match kar jaye to user mil jayega
+        })
+
+        if(!user){
+            throw new ApiError("User not found with this email or username", 404)
+        }
+
+        const isPasswordValid = await user.isPasswordCorrect(password)
+
+        if(!isPasswordValid){
+            throw new ApiError("Invalid password", 401)
+        }
+
+        const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id)
+
+        const loggedInUser = await User.findById(user._Id).select("-password -refreshtoken")// optional
+
+        // cookies ->> httpOnly, secure, sameSite, maxAge
+        //cookies-> cookies are small text files that are stored on the client side and sent to the server with every request. They are used to store user preferences, session information, and other data that needs to be persisted across requests.
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+
+        return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(
+            new ApiResponse(
+                200, 
+                { 
+                    user: loggedInUser, accessToken, refreshToken
+            },
+            "User logged in successfully")
+        )
+})
+
+// logout system ->> delete cookies and also delete refresh token from database
+
+const logoutUser = asyncHandler(async (req, res) => {
+    // delete cookies
+    // delete refresh token from database
+    await User.findByIdAndUpdate(
+        req.user._id, 
+        { 
+            refreshtoken: undefined
+        }, 
+        { 
+            new: true 
+        })// to delete refresh token from database and also to check if user exist or not with the help of
+    
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+
+        return res
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(
+            new ApiResponse(
+                200, 
+                null,
+                "User logged out successfully")
+        )
+})
+
+
+
 export { 
-    registerUser 
+    registerUser, 
+    loginUser ,
+    logoutUser
 }
