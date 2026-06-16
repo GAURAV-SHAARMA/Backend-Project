@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 
@@ -185,8 +186,10 @@ const logoutUser = asyncHandler(async (req, res) => {
     // delete refresh token from database
     await User.findByIdAndUpdate(
         req.user._id, 
-        { 
-            refreshtoken: undefined
+        {
+            $unset:{
+                refreshtoken: 1 //this will remove the field from document
+            } 
         }, 
         { 
             new: true 
@@ -468,7 +471,7 @@ const getUserChannelProfile =  asyncHandler(async(req , res)=>{
 const getWatchHistory = asyncHandler(async(req , res)=>{
     
     // converting user id ->>
-    const user = await user.aggregate([
+    const user = await User.aggregate([
         {
             $match:{
                 // _id: req.user._id// here mongoose will not work
