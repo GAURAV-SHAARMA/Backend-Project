@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { registerUser , loginUser , logoutUser,refreshAccesstoken } from "../controllers/user.controller.js"; 
+import { registerUser ,
+    loginUser ,
+    logoutUser,
+    refreshAccesstoken, changeCurrentPassword, getCurrentUser, updateAccountDetails, updateUserAvatar, updateUsercoverImage, getUserChannelProfile, getWatchHistory } from "../controllers/user.controller.js"; 
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -27,4 +30,24 @@ router.route("/logout").post(verifyJWT, logoutUser)//verifyJWT->> to check if us
 
 router.route("/refresh-token").post(refreshAccesstoken) // this route is public because when access token expires then user will not be able to access any protected route then how will he get new access token so this route should be public but we will verify the refresh token in controller
 
+
+router.route("/change-password").post(verifyJWT , changeCurrentPassword)
+
+
+router.route("/current-user").post(verifyJWT , getCurrentUser )
+
+router.route("/update-Account").patch(verifyJWT , updateAccountDetails) // we dont need complete change so we use  ( patch )
+
+
+router.route("/avatar").patch(verifyJWT , upload.single("avatar") , updateUserAvatar)
+
+router.route("/cover-image").patch(verifyJWT , upload.single("/coverImage") , updateUsercoverImage)
+
+
+router.route("/c/c:username").get(verifyJWT , getUserChannelProfile)
+
+
+router.route("/watch-history").get(verifyJWT , getWatchHistory)
+
 export default router
+
